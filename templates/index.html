@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSP con Hill Climbing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Función para obtener las coordenadas al seleccionar una ciudad
+        function obtenerCoordenadas() {
+            var ciudad = document.getElementById("ciudad").value;
+            
+            fetch('/coordenadas/' + ciudad)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.latitud && data.longitud) {
+                        document.getElementById("latitud").value = data.latitud;
+                        document.getElementById("longitud").value = data.longitud;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Función para obtener la solución del TSP
+        function obtenerSolucion() {
+            fetch('/resolver')
+                .then(response => response.json())
+                .then(data => {
+                    // Mostrar la ruta y la distancia en la página
+                    document.getElementById("ruta").innerText = "Ruta: " + data.ruta.join(" -> ");
+                    document.getElementById("distancia").innerText = "Distancia Total: " + data.distancia_total.toFixed(2) + " km";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Algoritmo TSP con Hill Climbing</h1>
+        <form>
+            <label for="ciudad">Selecciona una ciudad:</label>
+            <select id="ciudad" name="ciudad" onchange="obtenerCoordenadas()">
+                <option value="" disabled selected>Elige una ciudad</option>
+                {% for ciudad in ciudades %}
+                    <option value="{{ ciudad }}">{{ ciudad }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label for="latitud">Latitud:</label>
+            <input type="text" id="latitud" name="latitud" readonly><br><br>
+
+            <label for="longitud">Longitud:</label>
+            <input type="text" id="longitud" name="longitud" readonly><br><br>
+
+            <button type="button" onclick="obtenerSolucion()">Calcular Ruta</button>
+        </form>
+
+        <div id="resultado">
+            <p id="ruta"></p>
+            <p id="distancia"></p>
+        </div>
+    </div>
+</body>
+</html>
